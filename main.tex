@@ -1,0 +1,57 @@
+\documentclass[11pt]{report}
+
+\usepackage{amsthm} 	  % used for theorems, definitions
+\usepackage{amsfonts} 	% fonts from the American Mathematical Society
+\usepackage[backend=bibtex]{biblatex} 	% used for bibliography
+\usepackage{mathtools}
+
+\addbibresource{biblio.bib}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[chapter] % reset theorem numbering for each chapter
+
+\theoremstyle{definition}
+\newtheorem{definition}[thm]{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{example}[thm]{Example} % same for example numbers
+
+\newcommand{\Program}{\ensuremath{\mathcal{P}}}
+\newcommand{\Processes}{\ensuremath{\Pi}}
+\newcommand{\State}{\ensuremath{\sigma}}
+\newcommand{\States}{\ensuremath{\Sigma}}
+\newcommand{\MessagePool}{pool}
+\newcommand{\Var}{\ensuremath{\mathbb{V}}}
+\newcommand{\Domain}{\ensuremath{\mathbb{D}}}
+\newcommand{\Message}{\ensuremath{\mathbb{M}}}
+\newcommand{\PC}{\texttt{Loc}}
+
+
+\begin{document}
+
+\title{Dissertation}
+\author{Patricio Inzaghi Pronesti}
+\maketitle
+
+\begin{abstract}
+    \input{abstract}
+\end{abstract}
+
+\tableofcontents
+
+\input{intro/intro}
+
+\input{preliminaries/preliminaries}
+
+\input{commclosure/commclosure}
+
+\input{async2seq/async2seq}
+
+\input{tool/tool}
+
+\input{rustcommclosure/rustcommclosure}
+
+\input{conclusion/conclusion}
+
+
+\printbibliography
+
+\end{document}

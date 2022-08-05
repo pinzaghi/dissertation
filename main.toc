@@ -1,0 +1,39 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {1}Introduction}{2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}Preliminaries}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.1}Distal: a DSL for asynchronous protocols}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.2}Heard-of model: a language for round-based protocols}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.3}Sequential protocols}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.4}Randomize testing}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.5}Deductive verification}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}Communication closure}{4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.1}Definition and Axiomatization}{4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.2}An extension of communication closure with past messages}{4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}From asynchronous protocols to sequential ones}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.1}A rewriting procedure of an asynchronous Distal protocol into a round-based protocol in the Heard-Of model}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.2}Sequentialization of Heard-of protocols}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Tool and Experimental evaluation}{6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.1}The connection between Distal and P}{6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.2}Sequential P models}{6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.3}Benchmarks}{6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Proving communication closure in Rust}{7}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {7}Conclusion}{8}%
