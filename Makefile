@@ -1,7 +1,7 @@
 main.pdf:
 
 LATEX = pdflatex -interaction=nonstopmode
-BIBTEX = bibtex -min-crossrefs=1000
+BIBTEX = biber
 RERUN = ! egrep -q '(^LaTeX Warning:|\(natbib\)).* Rerun'
 UNDEFINED = ! egrep -q '^(LaTeX|Package natbib) Warning:.* undefined'
 
@@ -10,11 +10,10 @@ FIGSVG = $(wildcard *.svg */*.svg)
 FIGGENPDF = $(patsubst %.svg,%.pdf,$(FIGSVG))
 
 main.pdf: *.tex */*.tex *.bib $(FIGPNG) $(FIGGENPDF)
-	$(LATEX)  main.tex || (rm -f main.pdf && false)
-	$(BIBTEX) main.aux || (rm -f main.pdf && false)
-	$(LATEX)  main.tex || (rm -f main.pdf && false)
-	$(LATEX)  main.tex || (rm -f main.pdf && false)
-	$(LATEX)  main.tex || (rm -f main.pdf && false)
+	$(LATEX)  main || (rm -f main.pdf && false)
+	$(BIBTEX) main || (rm -f main.pdf && false)
+	$(LATEX)  main || (rm -f main.pdf && false)
+	$(LATEX)  main || (rm -f main.pdf && false)
 	$(RERUN) main.log
 	$(UNDEFINED) main.log
 
