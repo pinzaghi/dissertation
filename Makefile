@@ -34,8 +34,9 @@ IGNORE = \
 	 main.pdf \
 	 main.out \
 	 main.toc \
-	 *.run.xml \
-	 *.bcf \
+	 main.run.xml \
+	 main.bcf \
+	 main.toc
 	 $(FIGGENPDF)
 
 .PHONY: clean
