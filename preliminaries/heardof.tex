@@ -1,3 +1,17 @@
 \section{Heard-of model: a language for round-based protocols}
 \label{preliminaries:heardof}
 
+The syntax of round-based protocols \Psync\ consists of an initialization function \texttt{init} and a phase consisting of a non-empty finite sequence of rounds $r_1, ..., r_k$. 
+
+All processes execute the initialization function followed by the given sequence of rounds in lock-step, in a loop. 
+
+The round number is an abstract notion of time: all processes are in the same round. In each round, processes send messages in one synchronized step, using \texttt{SEND}. 
+
+Each process receives in one atomic step a non-deterministically chosen subset of the messages that were sent to it. We denote by $\mathit{mailbox} : P \rightarrow 2^{\mathit{Msg}}$ the set of received messages in the current round per process.
+Messages sent in a round, are either received in the same round or lost. 
+All processes update the local state synchronously, using \texttt{UPDATE}.  
+
+We introduce synchronization tags, a lightweight annotation for checking the existence of a round structure.
+
+
+

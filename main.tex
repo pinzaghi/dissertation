@@ -2,8 +2,11 @@
 
 \usepackage{amsthm} 	  % used for theorems, definitions
 \usepackage{amsfonts} 	% fonts from the American Mathematical Society
-\usepackage[backend=bibtex]{biblatex} 	% used for bibliography
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[backend=biber,style=alphabetic]{biblatex} 	% used for bibliography
 \usepackage{mathtools}
+\usepackage{subcaption}
 
 \addbibresource{biblio.bib}
 
@@ -14,9 +17,15 @@
 \newtheorem{definition}[thm]{Definition} % definition numbers are dependent on theorem numbers
 \newtheorem{example}[thm]{Example} % same for example numbers
 
+\newcommand{\phase}{\ensuremath{\mathit{phase}}}
+\newcommand{\round}{\ensuremath{\mathit{round}}}
 \newcommand{\Program}{\ensuremath{\mathcal{P}}}
+\newcommand{\Pasync}{\ensuremath{\mathcal{P}}}
+\newcommand{\Psync}{\ensuremath{\mathcal{P}_{\mathit{round}}}}
+\newcommand{\Pseq}{\ensuremath{\mathcal{P}_{\mathit{seq}}}}
+\newcommand{\Pclosed}{\ensuremath{\mathcal{P}_{\mathit{phase}}}}
 \newcommand{\Processes}{\ensuremath{\Pi}}
-\newcommand{\State}{\ensuremath{\sigma}}
+%\newcommand{\State}{\ensuremath{\sigma}}
 \newcommand{\States}{\ensuremath{\Sigma}}
 \newcommand{\MessagePool}{pool}
 \newcommand{\Var}{\ensuremath{\mathbb{V}}}

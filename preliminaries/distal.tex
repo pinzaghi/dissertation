@@ -1,5 +1,52 @@
 \section{Distal: a DSL for asynchronous protocols}
 \label{preliminaries:distal}
 
+We consider asynchronous protocols written in Distal~\cite{biely_distal_2013}. The system is composed of $N$ processes, where $N$ is a parameter. Each process is associated with a unique identifier, which serves as an address for sending and receiving messages. All processes execute the same protocol $\mathcal{P}$ written using the syntax in Fig. \ref{fig:distalsyntax}. 
+
+\begin{figure}[h]
+\scriptsize
+\begin{tabular}{lll}
+type $\mathbb{M}$ ::= struct \{
+      field \textbf{Identifier};
+  \} \\
+e ::= const \textbar\ x \textbar\ $f(\vec{x})$& \textbf{Expressions} \\ 
+
+Action ::= \quad x = e & \textbf{Statements} \\ 
+    \qquad \qquad \textbar \quad $\mathtt{if}$ e $\mathtt{then}$ Action $\mathtt{else}$ Action \\ 
+    \qquad \qquad \textbar \quad $\mathtt{send(p,m)}$ \textbar\ $\mathtt{send(m)}$ $\mathtt{to\ ALL}$ \textbar\ $\mathtt{send\ to}$ p \\
+    \qquad \qquad \textbar \quad Action ; Action \\
+
+U ::= $\mathtt{upon}$ $\mathbb{M}$ $\mathtt{with}$ Guard $\mathtt{do}$ Action \textbar\ U ; U & \textbf{Upon statements} \\
+ 
+    $\mathcal{P}$ ::= $\mathtt{init:}$ Action; $\mathtt{loop:}$ U & \textbf{Program} \\
+\end{tabular}
+
+\caption{Syntax of Distal protocols, $p$ is a process identifier, $x \in \mathit{Identifier}$, $m$ is a message of some message type in $\mathbb{M}$.}
+\label{fig:distalsyntax} 
+\end{figure}
+
+Protocols are composed by an $\mathit{init}$ statement and a main loop containing a sequence of $\mathit{upon}$ statements. An upon statement is composed of a predicate $\mathit{guard}$ and a body with instructions to be executed. Processes can access a read-only mailbox variable, \texttt{mbox}, which contains the received messages. 
+The guard of each upon is a formula over the local state and the mailbox. We say that a guard is \textit{enabled} when the formula is true under the current local state and mailbox.
+Distal follows the event-driven paradigm where the state of a process is updated every time an upon is enabled.  
+Processes exchange different types of messages. The instructions \texttt{send} and \texttt{send to all} take $m$, a message of a certain type, as input (besides a process ID). 
+All variables are local to a process, there is no shared memory. 
+
+\paragraph{Semantics} The semantics of a protocol $\mathcal{P}$ is the asynchronous parallel composition of the actions performed by all processes. Formally, the state $S$ of a protocol is a tuple $\langle s, \mathit{msg} \rangle$ where $s \in \left[ P \rightarrow \mathit{Vars} \cup \mathit{Loc} \rightarrow \mathcal{D} \right]$ is a valuation of the local variables of each process, where the program location is added to the local state and $\textit{msg}:P \rightarrow \mathit{Msg}$ is the global set of messages in transit. Given a process $p \in P$, $s_p$ is the local state of $p$, which is a valuation of $p$'s local variables, and $msg_p$ is the set of messages in transit towards $p$. 
+
+When a replica starts, it executes the $\mathit{init}$ code block and then iterates the main loop indefinitely. 
+Executing an action makes a process change its state.
+
+Every process has a message pool that other processes write messages to. The semantics of $\mathit{send(p, m)}$ adds the  message $\mathit{m}$ to p's message pool. 
+In every iteration of the main loop a process will check for new messages, moving a subset of its message pool to its local \texttt{mbox}.  
+Messages dropped by the network never appear in \texttt{mbox}. 
+
+Several upons could be enabled in the same iteration, but to keep local determinism only the first one will be executed. The listing order is used to break the ties between them~\footnote{Distal does not emphasize the loop and allows multiple upon statements to be executed in a sequence. The latter is captured by multiple loop iterations where no new messages are delivered in between.}. 
+The network assumptions are defined at execution time in Distal. We consider both protocols: the ones that make no assumptions for safety, where messages can be reordered, delayed or dropped; or those whose network assumptions for safety are given as first-order formulas over the messages received by processes.
+
+
+
+
+
+
 
 

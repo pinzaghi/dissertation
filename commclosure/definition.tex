@@ -1,3 +1,16 @@
 \section{Definition and Axiomatization}
 \label{commclosure:definition}
 
+\begin{definition}[Synchronization tag]
+\label{def:synctag}
+For a protocol $\Pasync$, a synchronization tag is a tuple 
+$\langle(\mathit{phase},\mathit{round}),\mathit{tagm} \rangle$ where $\mathit{phase}$ and $\mathit{round}$ come from ordered domains and round takes a bounded number of values. $\mathit{tagm}$ : $\mathcal{M}$ $\rightarrow$ $[\{(\mathit{phase},\mathit{round})\}$ $\rightarrow$ $\mathcal{M}$ $\cup$ $\mathit{Fields}(\mathcal{M})]$ for each message type $\mathbb{M} \in \mathcal{M}$ maps $\mathit{phase}$ and $\mathit{round}$ over the fields of $\mathbb{M}$, or the type itself.
+For each message $m:\mathbb{M} \in \mathcal{M}$ we denote $\mathit{tagm}$ by $\mathit{m.phase}$ and $\mathit{m.round}$.
+\end{definition}
+
+A protocol is round-based if there is a synchronization tag and two variables \phase\ and \round, such that, 
+(1) the values of $(\phase,\round)$ monotonically increase (w.r.t. the lexicographic order) in any execution of the protocol,
+(2) for every message sent $m$, either using $\mathit{send(p,m)}$ or $\mathit{broadcast(m)}$, $m$ is timestamped with $m.\phase=\phase$ and $m.\round=\round$, 
+(3) each guard uses messages timestamped with values greater or equal than the current value \phase\ and \round\, 
+(4) actions use (read) only the messages from the mbox that are timestamped with current value of \phase\ and \round\, 
+(5) between a send/broadcast and a receive either there are only receive statements or the values of \phase\ and \round\ have been updated. If there is any update between two receive steps then it must update also  \phase\ and \round.  

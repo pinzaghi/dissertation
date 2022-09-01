@@ -1,2 +1,55 @@
 \section{Sequential protocols}
 \label{preliminaries:sequential}
+
+A sequential protocol is a sequential program computed from a round-based protocol \Psync. It manipulates the following variables: an integer variable $n$, corresponding to the number of processes executing the protocol, for each variable $v$ of type $T$ in \Psync, it has $s_v$ an array of type $\mathit{ID} \rightarrow T$, where each index $i$ gives the value of the variable for process $p_i$.
+
+The sequentialization \Pseq\ manipulates several arrays, each storing elements of some message type, and $\texttt{mbox}_{r}[p_i]$ is the value of $\texttt{mbox}$ in round $r$ on process $p_i$. 
+The transition relation of \Pseq\ defines a total order over all actions performed by all processes, i.e., an order across all \texttt{send} and \texttt{update}.
+
+Round-based protocols impose a total order over actions performed by processes across rounds. 
+The sequentialization maintains this order, and it is mainly concerned with the code of one round. 
+The sources of non-determinism at the round level are: 
+(1) the order in which processes send messages 
+(2) the order in which processes execute update 
+(3) the order in which messages are received and
+(4) which messages are received. 
+
+The round-based semantics ensure that between any two processes $p$ and $q$ there is at most one message that is sent from $p$ to $q$ and vice versa.  
+Consequently, the order in which send and receive actions are sequentialized does not matter. 
+
+The update function takes the set of received messages as input, and performs a local computation. Two update functions of the same round, on different processes are independent.
+
+Therefore, we fix one order across processes, denoted  $p_1, p_2, \ldots p_n$ where the index gives the order relation.
+The calls to send and update are sequentialized according to this order, where all sends go before all updates. 
+
+\begin{algorithm}[H]
+\caption{Sequentialization}
+\begin{algorithmic}[1]
+\scriptsize
+
+\For{$\mathtt{s=1\ to\ n}$} \Comment{RoundSeq}
+    \For{$\mathtt{r=1\ to\ n}$}
+        \State $\mathtt{mailbox_R(p_r)}$ += $\mathtt{(*)p_s.send(p_r)}$ \label{algorithm:sequentialization:choose}
+    \EndFor
+\EndFor
+
+\For{$\mathtt{i=0\ to\ n}$}
+    \State $\mathtt{p_i.update(mailbox_R(p_i))}$
+    \State $\mathtt{mailbox_R(p_i)=\emptyset}$
+\EndFor
+
+\While{$\mathtt{true}$} \Comment{ProtocolSeq}
+    \For{$\mathtt{R=1\ to\ K}$}
+        \State $\mathtt{RoundSeq(R)}$
+    \EndFor
+\EndWhile
+\end{algorithmic}
+\label{algorithm:sequentialization}
+\end{algorithm}
+
+For each message sent the sequential program makes a non-deterministic choice whether to deliver it or not. 
+Each \texttt{send-receive} pair is replaced with an assignment, that non-deterministically adds or not the sent message to the receiver's mailbox.
+
+Algorithm~\ref{algorithm:sequentialization} uses ``$*$" to represent a non-deterministic choice, i.e., if the message sent by process $p_i$ to process $p_j$ is received by $p_j$. 
+
+A protocol consisting of $K$ rounds is sequentialized in a while loop that executes the sequentialization of one round after another, in the order in which they are defined in the round-based protocol. 

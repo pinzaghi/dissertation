@@ -8,4 +8,6 @@
 *.synctex.gz
 *.log
 *.fls
+*.run.xml
 *.pdf
+*.bcf
