@@ -1,3 +1,136 @@
-\section{A rewriting procedure of an asynchronous Distal protocol into a round-based protocol in the Heard-Of model}
-\label{async2seq:procedure}
+Given a Distal program, we want to compute its round-based counterpart. For this, we need to understand in which order the upons can be executed, under which conditions, and be able to delimit the boundaries between phases in the code.
+The statements between any two phase variable assignments is what we call the protocol's phase structure. We find it by unfolding the iterations of a Distal program, preserving the order in which the upons happen and their context. Fig. \ref{unfoldsyntax} shows the syntax of an unfolded program \Pclosed. Algorithm \ref{alg:unfold} describes the unfold procedure. The output program satisfies Proposition \ref{propoequiv}.
 
+\begin{proposition}
+For each execution $\tilde{\pi} \in \Pclosed$ there is an execution $\pi \in \Pasync$ such that $\pi \approx \tilde{\pi}$, i.e., $\tilde{\pi}$ and $\pi$ are equivalent. Two executions are equivalent if the sequence of states is the same modulo stuttering. 
+\label{propoequiv}
+\end{proposition}
+
+\begin{proof}
+\Pclosed\ doesn't introduce or restrict behaviors of \Pasync. Let $\overline{\pi} = [\langle \overline{s_0}, \emptyset \rangle]$ be an execution that starts with $\overline{s_0} = \Pclosed.init()$ and an empty mailbox. Algorithm \ref{alg:unfold} defines $\Pclosed.init() = \Pasync.init()$ (line \ref{alg:unfold:init}), so in \Pasync\ exists $\pi = [\langle s_0, \emptyset \rangle]$ such that $s_0 = \overline{s_0} $. 
+$\langle \overline{s_1}, msg_1 \rangle$ is the result of executing \Pclosed's first iteration ($height = 1$) from state $\overline{s_0}$ where $havoc()$ returns $msg_1$. 
+The unfolded conditionals respect the original order in \Pasync. Given the same state and mailbox, the selected upon is uniquely determined. \Pclosed\ and \Pasync\ are in the same state with the same mailbox so they execute the same upon, i.e., $\overline{\pi} = \pi = [\langle \overline{s_0}, \emptyset \rangle, \langle \overline{s_1}, msg_1 \rangle]$. The same argument can be followed at most $K$ times, when the unfolding stops with a phase variable increment. For the following $\mathit{K+1}...$ transitions, we show that the code to execute is congruent to the first $K$ iterations of Algorithm \ref{alg:unfold}. The phase variable is interpreted as a symbolic variable. When a new phase starts, the set of enabled upons is the same as the one considered from the initial state, but with a greater phase value.
+\end{proof}
+
+\begin{figure}
+\begin{tabular}{lll}
+type $\mathbb{M}$ ::= struct \{
+      field \textbf{Identifier};
+  \} \\
+e ::= const \textbar\ x \textbar\ $f(\vec{x})$& \textbf{Expressions} \\ 
+S ::= $x =$ e \textbar\ $\mathtt{if}$ e $\mathtt{then}$ S $\mathtt{else}$ S \textbar\  S ; S & \textbf{Statements} \\ 
+SEND ::= $\mathtt{send(p,m)}$ \textbar\ $\mathtt{send(m)}$ $\mathtt{to}$ $\mathtt{ALL}$ \textbar\ $\mathtt{noop}$ & \textbf{Send actions} \\ 
+C ::= $\mathtt{if}$ e $\mathtt{then}$ ; SEND ; S ; U \textbar\ C ; C & \textbf{Conditionals} \\
+U ::= $\mathtt{mbox = havoc()}$ ; C \textbar\ $\mathtt{continue}$ & \textbf{Statements} \\
+ 
+\Pclosed\ ::= $\mathtt{init: \Pasync.init()}$ ; S ; $\mathtt{loop:}$ U & \textbf{Program} \\
+\end{tabular}
+
+\caption{Syntax for the phase structure, $p$ is a PID, $x \in \mathit{Identifier}$, and $m$ is a message type in $\mathbb{M}$.}
+\label{unfoldsyntax}
+\end{figure}
+
+Algorithm \ref{alg:unfold} starts by creating a program with an initializing function and a \texttt{while(true)} statement with an empty body. It follows by \textit{unfolding} the main loop, this is: 1) inserting a \texttt{mbox = havoc();} statement; 2) for each \texttt{upon guard do action} in \Pasync\ it creates an \texttt{if(guard)\{action\}} statement inside the while body (line \ref{alg:unfold:addif}). In the following iterations we repeat the unfolding for every \texttt{if} statement created in the previous one, given by the function \textit{leafs}. This procedure is repeated $K$ times, where $K$ is the number of rounds in a phase.
+
+
+\subsection{Delimiting rounds' boundaries}
+
+\begin{figure}[h]
+%\begin{multicols}{2}
+\begin{algorithmic}[1]
+\scriptsize
+\State MessageType: Prepare, Ack, Propose, Promise;
+\State struct Message \{ Command payload, MessageType round, int ballot \};
+\State struct Prepare \{ int ballot\}; 
+\State struct Ack \{ int ballot, int last, Command[]: log\};
+\State struct Propose \{ int ballot, Command[]: log\};
+\State struct Promise \{ int ballot, Command[]: log\};
+\Init
+    \State ballot $\leftarrow$ 0;
+    \If{primary(ballot+1)}
+        \State ballot = ballot+1;
+        \State m = new PrepareMsg(ballot);
+    	\State \textbf{send} m \textbf{to} ALL;
+    \EndIf
+\EndInit
+\While{true}
+    \Upon{\mbox{Prepare}}{\text{m.ballot} > \text{ballot}} \label{example:prepare} 
+        \State last $\leftarrow$ ballot; %// BUG, remove
+        \State ballot $\leftarrow$ m.ballot; promised = false; primary $\leftarrow$ m.sender;
+        \State m $\leftarrow$ new Ack(ballot, last, log); \label{example:ackstart}
+        \State \textbf{send} m \textbf{to} primary;
+    \EndUpon
+    \Upon{\mbox{Ack}}{\text{m.ballot == ballot} \ \mbox{\textbf{times}}\ \text{n/2}}\label{example:ack}
+        \State log = longest\_valid\_log(ballot); log.add(newCommand());\label{example:newCommand}
+        \State m = new Propose(ballot, log);
+        \State \textbf{send} m \textbf{to} ALL;
+    	    %\State \round $\leftarrow$ $\leaderis$
+    \EndUpon
+    \Upon{\mbox{Propose}}{ \text{m.ballot} \geq \text{ballot} \land \neg\text{promised}} \label{example:propose} 
+        \State ballot = m.ballot; log = m.log;
+        \State m = new Promise(ballot,log);
+        \State \textbf{send} m \textbf{to} ALL;
+    \EndUpon
+    \Upon{\mbox{Promise}}{\text{m.ballot} \geq \text{ballot} \land \text{m.log == log}\ \mbox{\textbf{times}}\ \text{n/2}} \label{example:promise}
+        \State ballot = m.ballot; log = m.log; promised = true; output(log);\label{example:output}
+    	\If{primary(ballot+1)}
+            \State ballot = ballot+1;
+            \State m = new Prepare(ballot); \textbf{send} m \textbf{to} ALL;
+        \EndIf
+    \EndUpon
+    \Upon{\text{timeout()}}{\mathtt{true}} \label{example:timeout}
+    	\If{primary(ballot+1)}
+            \State ballot = ballot+1;
+            \State m = new Prepare(ballot);
+        	\State \textbf{send} m \textbf{to} ALL;
+        \EndIf
+    \EndUpon
+\EndWhile
+\end{algorithmic} 
+%\end{multicols}
+\caption{Simple Paxos protocol in Distal}
+\label{fig:example}
+\end{figure}
+
+Round boundaries are defined by round variable assignments. Processes can have different behaviors in the same round, depending on their local state and the messages received, although they execute the same code and go through the same sequence of rounds. 
+
+Fig. \ref{roundcode} shows the code of the \texttt{Ack} round computed from our motivating example. We start by iterating line by line starting from the $init$ function of \Pclosed\ and traverse the main loop until we reach the first assignment of the round variable to \texttt{Ack} (line \ref{example:ackstart} in Fig. \ref{fig:example}). Then, we start collecting a sequence of instructions until the next assignment of the round variable (line \ref{example:ackend}).
+
+\begin{figure}
+\begin{algorithm}[H]
+\caption{}
+\label{alg:unfold}
+\hspace*{\algorithmicindent} \textbf{Input:} Asynchronous program $\mathcal{P}$ \\
+\hspace*{\algorithmicindent} \textbf{Output:} Unfolded program $\overline{\mathcal{P}}$
+\begin{algorithmic}[1]
+\State $\overline{\Pasync} \leftarrow \mathit{init:  \Pasync\mathtt{.init()} ; loop: noop ;}$ \label{alg:unfold:init}
+\For{ $\mathtt{height} \in 1$ $\mathtt{to}$ $K$ } \label{alg:unfold:iteration}
+    \For{ $\mathtt{body}$ in $\mathtt{leafs}(\Pclosed)$ } 
+        \State $\mathtt{body.append(\mathit{mbox_{height} = havoc()})}$
+        \For{ $\mathtt{upon}$ in $\mathtt{upons(\Pasync)}$ } 
+            \State $\mathtt{ifStm} \leftarrow \mathit{if(\mathtt{upon.guard})\{ \mathtt{upon.action} \}}$
+            \State $\mathtt{body.append(ifStm)}$ \label{alg:unfold:addif}
+        \EndFor
+    \EndFor
+\EndFor
+\State $\overline{\Pasync} \leftarrow \mathtt{deadCodeElimination}(\overline{\Pasync})$
+\State \textbf{return} $\overline{\Pasync}$
+\end{algorithmic} 
+\end{algorithm}
+\end{figure}
+
+All the code before the first assignment is ignored. We introduce ghost variables, e.g, \texttt{flag}, to preserve the conjunction of all the guards leading to the collected code, conserving the execution context. In this case, we cannot send an \texttt{Ack} message without having received a valid \texttt{Prepare} message.
+Finally, the code of every round is split into a \texttt{SEND} block, consisting of the (unique) send statement guarded by the conditionals preceding them and an \texttt{UPDATE} block that contains the rest of the code except the mailbox’s havoc. This completes the code of $\Psync$ where proposition \ref{propo:async:equiv:sync} holds.
+\begin{proposition}
+Let $\llbracket \Pasync \rrbracket$ be the set of executions of $\Pasync$. Given a protocol that makes no network assumptions, $\llbracket \Pasync \rrbracket \approx \llbracket \Psync \rrbracket$, otherwise $\llbracket \Pasync \rrbracket \subseteq \llbracket \Psync \rrbracket$.
+\label{propo:async:equiv:sync}
+\end{proposition}
+
+\begin{figure}
+\renewcommand{\ttdefault}{pcr}
+\lstinputlisting[escapechar=|,xleftmargin=.04\textwidth]{./code/roundcode.c}
+\caption{Code of round \texttt{Ack}.}
+\label{roundcode}
+\end{figure}
+
+This procedure is based on \cite{damian_communication-closed_2019}, but the input received in that work is significantly different. In \cite{damian_communication-closed_2019} the reception loops are found explicitly in the code, these are replaced with calls to a havoc function that non-deterministicaly fills the mailbox. Their work also assumes that every iteration of the main loop moves to a (greater) new phase and it does not check that this holds. This property is guaranteed to hold by Alg. \ref{alg:unfold}.

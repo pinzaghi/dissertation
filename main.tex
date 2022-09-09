@@ -1,17 +1,22 @@
 \documentclass[11pt]{report}
 
 \usepackage{amsthm} 	  % used for theorems, definitions
+\usepackage{amsmath}
 \usepackage{amsfonts} 	% fonts from the American Mathematical Society
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage[backend=biber,style=alphabetic]{biblatex} 	% used for bibliography
 \usepackage{mathtools}
+\usepackage{stmaryrd}
 \usepackage{subcaption}
+\usepackage{listings}
+\usepackage{xcolor}
 
 \addbibresource{biblio.bib}
 
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}[chapter] % reset theorem numbering for each chapter
+\newtheorem{proposition}{Proposition}[chapter] % reset propositions numbering for each chapter
 
 \theoremstyle{definition}
 \newtheorem{definition}[thm]{Definition} % definition numbers are dependent on theorem numbers
@@ -33,6 +38,7 @@
 \newcommand{\Message}{\ensuremath{\mathbb{M}}}
 \newcommand{\PC}{\texttt{Loc}}
 
+\newcommand{\todo}[1]{\textcolor{red}{TODO: #1}}
 
 \begin{document}
 
@@ -46,18 +52,81 @@
 
 \tableofcontents
 
+\chapter{Introduction}
+\label{intro}
 \input{intro/intro}
 
-\input{preliminaries/preliminaries}
+\chapter{Preliminaries}
+\label{preliminaries}
+In this chapter we present Distal~ \cite{biely_distal_2013}, a domain specific language for fault-tolerant systems, and P~\cite{desai_p_2013} a modeling language for event-driven systems that is equipped with a bug-finding tool. 
 
-\input{commclosure/commclosure}
+    \section{Distal: a DSL for asynchronous protocols}
+    \label{preliminaries:distal}
+    \input{preliminaries/distal}
 
-\input{async2seq/async2seq}
+    \section{Heard-of model: a language for round-based protocols}
+    \label{preliminaries:heardof}
+    \input{preliminaries/heardof}
 
-\input{tool/tool}
+    \section{Sequential protocols}
+    \label{preliminaries:sequential}
+    \input{preliminaries/sequential}
 
-\input{rustcommclosure/rustcommclosure}
+    \section{Randomize testing}
+    \label{preliminaries:testing}
+    \input{preliminaries/testing}
+        \subsection{Stateless model checking}
 
+        \subsection{Stateful model checking}
+
+    \section{Deductive verification}
+    \label{preliminaries:verification}
+    \input{preliminaries/verification}
+
+\chapter{Communication closure}
+\label{commclosure}
+    \section{Definition and Axiomatization}
+    \label{commclosure:definition}
+    \input{commclosure/definition}
+
+    \section{An extension of communication closure with past messages}
+    \label{commclosure:extension}
+    \input{commclosure/extension}
+
+\chapter{Translating asynchronous executions to sequential}
+\label{async2seq}
+    \todo{The idea is to go from Async Distal to Seq Distal}
+    \section{Reduction of asynchronous Distal executions into Heard-of executions}
+    \label{async2seq:procedure}
+    %\input{async2seq/procedure}
+
+    \section{Reduction Heard-of protocols to sequential Distal}
+    \label{async2seq:sequentialization}
+    %\input{async2seq/sequentialization}
+
+\chapter{Tool}
+\label{tool}
+
+    \section{Translating Asynchronous Distal to Sequential Distal}
+    \label{tool:translateasynctosync}
+    
+    \section{Implementation details}
+    
+\chapter{Experimental evaluation}
+    \todo{Modeling in P / TLA is MANUAL and not directly related with our tool}
+
+    \section{Applications using P}
+
+    \section{Applications using TLA}
+    \todo{Describe the modeling with TLA, how its model checking tool works, how the examples are modeled, run apalache and see if the bugs are found}
+
+    \section{Benchmarks}
+
+    \section{Proving communication closure in Rust}
+    \label{rustcommclosure}
+
+\chapter{Conclusion}
+\label{conclusion}
 \input{conclusion/conclusion}
 
 \printbibliography

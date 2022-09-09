@@ -1,6 +1,3 @@
-\section{Sequential protocols}
-\label{preliminaries:sequential}
-
 A sequential protocol is a sequential program computed from a round-based protocol \Psync. It manipulates the following variables: an integer variable $n$, corresponding to the number of processes executing the protocol, for each variable $v$ of type $T$ in \Psync, it has $s_v$ an array of type $\mathit{ID} \rightarrow T$, where each index $i$ gives the value of the variable for process $p_i$.
 
 The sequentialization \Pseq\ manipulates several arrays, each storing elements of some message type, and $\texttt{mbox}_{r}[p_i]$ is the value of $\texttt{mbox}$ in round $r$ on process $p_i$. 

@@ -1,6 +1,3 @@
-\section{Distal: a DSL for asynchronous protocols}
-\label{preliminaries:distal}
-
 We consider asynchronous protocols written in Distal~\cite{biely_distal_2013}. The system is composed of $N$ processes, where $N$ is a parameter. Each process is associated with a unique identifier, which serves as an address for sending and receiving messages. All processes execute the same protocol $\mathcal{P}$ written using the syntax in Fig. \ref{fig:distalsyntax}. 
 
 \begin{figure}[h]
@@ -44,7 +41,30 @@ Several upons could be enabled in the same iteration, but to keep local determin
 The network assumptions are defined at execution time in Distal. We consider both protocols: the ones that make no assumptions for safety, where messages can be reordered, delayed or dropped; or those whose network assumptions for safety are given as first-order formulas over the messages received by processes.
 
 
+\algdef{SE}{Upon}{EndUpon}[2]{%
+\textbf{upon} \(#1\) \textbf{with} \(#2\) \textbf{do}}{%
+\textbf{end}}
+\algtext*{EndUpon}
 
+\algdef{SE}{Round}{EndRound}[1]{%
+\textbf{ROUND} \(#1\) \textbf{do}}{%
+\textbf{end}}
+\algtext*{EndRound}
+
+\algdef{SE}{Send}{EndSend}{%
+\textbf{SEND:}}{%
+\textbf{end}}
+\algtext*{EndSend}
+
+\algdef{SE}{Update}{EndUpdate}{%
+\textbf{UPDATE(mbox):}}{%
+\textbf{end}}
+\algtext*{EndUpdate}
+
+\algdef{SE}{Init}{EndInit}{%
+\textbf{init}}{%
+\textbf{end}}
+\algtext*{EndInit}
 
 
 
