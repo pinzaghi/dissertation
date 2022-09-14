@@ -50,7 +50,7 @@ Algorithm \ref{alg:unfold} starts by creating a program with an initializing fun
     \If{primary(ballot+1)}
         \State ballot = ballot+1;
         \State m = new PrepareMsg(ballot);
-    	\State \textbf{send} m \textbf{to} ALL;
+        \State \textbf{send} m \textbf{to} ALL;
     \EndIf
 \EndInit
 \While{true}
@@ -64,7 +64,7 @@ Algorithm \ref{alg:unfold} starts by creating a program with an initializing fun
         \State log = longest\_valid\_log(ballot); log.add(newCommand());\label{example:newCommand}
         \State m = new Propose(ballot, log);
         \State \textbf{send} m \textbf{to} ALL;
-    	    %\State \round $\leftarrow$ $\leaderis$
+            %\State \round $\leftarrow$ $\leaderis$
     \EndUpon
     \Upon{\mbox{Propose}}{ \text{m.ballot} \geq \text{ballot} \land \neg\text{promised}} \label{example:propose} 
         \State ballot = m.ballot; log = m.log;
@@ -73,16 +73,16 @@ Algorithm \ref{alg:unfold} starts by creating a program with an initializing fun
     \EndUpon
     \Upon{\mbox{Promise}}{\text{m.ballot} \geq \text{ballot} \land \text{m.log == log}\ \mbox{\textbf{times}}\ \text{n/2}} \label{example:promise}
         \State ballot = m.ballot; log = m.log; promised = true; output(log);\label{example:output}
-    	\If{primary(ballot+1)}
+        \If{primary(ballot+1)}
             \State ballot = ballot+1;
             \State m = new Prepare(ballot); \textbf{send} m \textbf{to} ALL;
         \EndIf
     \EndUpon
     \Upon{\text{timeout()}}{\mathtt{true}} \label{example:timeout}
-    	\If{primary(ballot+1)}
+        \If{primary(ballot+1)}
             \State ballot = ballot+1;
             \State m = new Prepare(ballot);
-        	\State \textbf{send} m \textbf{to} ALL;
+            \State \textbf{send} m \textbf{to} ALL;
         \EndIf
     \EndUpon
 \EndWhile
@@ -126,7 +126,7 @@ Let $\llbracket \Pasync \rrbracket$ be the set of executions of $\Pasync$. Given
 \label{propo:async:equiv:sync}
 \end{proposition}
 
-\begin{figure}
+\begin{figure}[h]
 \renewcommand{\ttdefault}{pcr}
 \lstinputlisting[escapechar=|,xleftmargin=.04\textwidth]{./code/roundcode.c}
 \caption{Code of round \texttt{Ack}.}

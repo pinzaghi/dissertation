@@ -1,0 +1,119 @@
+Algorithm \ref{alg:seq} builds a sequential protocol \Pseq, such that, given an initial (global) state $c_0$, all the (global) states reachable from $c_0$ in \Psync\ are also reachable executing \Pseq\ from $c_0$. Equivalently, we say that proposition \ref{propo:sync:equiv:seq} holds.
+
+\begin{figure}[h]
+\begin{algorithm}[H]
+\caption{Sequentialization}
+\begin{algorithmic}[1]
+\scriptsize
+
+\For{$\mathtt{s=1\ to\ n}$} \Comment{RoundSeq}
+    \For{$\mathtt{r=1\ to\ n}$} \label{seq:recv2}
+        \State $\mathtt{mailbox_R(p_r)}$ += $\mathtt{(*)p_s.send(p_r)}$ \label{seq:choose}
+    \EndFor
+\EndFor
+
+\For{$\mathtt{i=0\ to\ n}$} \label{seq:recv2} \label{seq:upd}
+    \State $\mathtt{p_i.update(mailbox_R(p_i))}$
+    \State $\mathtt{mailbox_R(p_i)=\emptyset}$
+\EndFor
+
+\While{$\mathtt{true}$} \Comment{ProtocolSeq}
+    \For{$\mathtt{R=1\ to\ K}$}
+        \State $\mathtt{RoundSeq(R)}$
+    \EndFor
+\EndWhile
+\end{algorithmic}
+\label{alg:seq}
+\end{algorithm}
+\end{figure}
+
+The state of \Pseq\ is defined from the global state of \Psync. The sequential program manipulates the following variables: an integer variable $n$, corresponding to the number of processes executing the round-based protocol, for each variable $v$ of type $T$ in \Psync, it has $s_v$ an array of type $\mathit{ID} \rightarrow T$, where each index $i$ gives the value of the variable for process $p_i$. 
+For example, in \Psync, $\texttt{mbox}$ is a local variable that stores the messages received in a round. It changes its type in each round because each of them sends different types of messages. The sequentialization \Pseq\ manipulates several arrays, each storing elements of some message type, and $\texttt{mbox}_{r}[p_i]$ is the value of $\texttt{mbox}$ in round $r$ on process $p_i$. 
+The transition relation of \Pseq\ defines a total order over all actions performed by all processes, i.e., an order across all \texttt{send} and \texttt{update}.
+  
+Round-based protocols impose a total order over actions performed by processes across rounds. 
+The sequentialization maintains this order, and it is mainly concerned with the code of one round. 
+The sources of non-determinism at the round level are: 
+(1) the order in which processes send messages 
+(2) the order in which processes execute update 
+(3) the order in which messages are received and
+(4) which messages are received.
+
+The update function takes the set of received messages as input, and performs a local computation. We fix one order across processes, denoted  $p_1, p_2, \ldots p_n$ where the index gives the order relation.
+The calls to send and update are sequentialized according to this order, where all sends go before all updates, lines~\ref{seq:send} and lines~\ref{seq:upd} in Algorithm~\ref{alg:seq}. 
+
+For each message sent the sequential program makes a non-deterministic choice whether to deliver it or not. 
+Each \texttt{send-receive} pair is replaced with an assignment, that non-deterministically adds or not the sent message to the receiver's mailbox.
+
+Algorithm~\ref{alg:seq} uses ``$*$" to represent a non-deterministic choice in  line~\ref{seq:choose}, i.e., if the message sent by process $p_s$ to process $p_r$ is received by $p_r$. 
+
+A protocol consisting of $K$ rounds is sequentialized in a while loop that executes the sequentialization of one round after another, in the order in which they are defined in the round-based protocol. 
+
+\begin{proposition}
+    Given a round-based protocol that makes no network assumptions, $\llbracket \Psync \rrbracket \approx \llbracket \Pseq \rrbracket$.
+\label{propo:sync:equiv:seq}
+\end{proposition}
+
+\begin{proof}
+    Let $\rho = \parallel^{n}_{i=1} send_*(i,1) \parallel ... \parallel send_*(i,n); \parallel^{n}_{i=1} update(i);$ be the execution of a \Psync\ round.
+
+    The round-based semantics ensure that between any two processes $p$ and $q$ there is at most one message sent from $p$ to $q$ and vice versa.  
+Consequently, the order in which send and receive actions are executed does not matter. We obtain $\rho' = send_*(1,1); send_*(1,n); ... ; send_*(n,1); ...; send_*(n,n); \parallel^{n}_{i=1} update(i);$ such that $\rho' \approx \rho$.
+
+Two update functions of the same round, on different processes are independent, we can remove other source of non-determinism fixing an arbitrary order $\rho'' = send_*(1,1); send_*(1,n); ... ; send_*(n,n); update(1); ... ; update(n);$ and this results in $\rho'' \approx \rho$. This reasoning is valid for any arbitrary round, proving our claim.
+\end{proof}
+
+\subsection{Protocols with network assumptions}
+
+If the protocol makes assumptions about the set of messages delivered then, by proposition \ref{propo:sync:equiv:seq:network}, we know that the sequentialization given in Alg.~\ref{alg:seq} produces an over-approximation of the round-based executions. We strengthen Alg.~\ref{alg:seq} for the most common fault models to preserve the equivalence between the synchronous protocol and the sequential one. For protocols that do not tolerate faults, e.g., 2PC,  each sent message is received. The sequentialization is deterministic. 
+
+\begin{figure}[h]
+    \begin{subfigure}{.5\textwidth}
+        \begin{algorithmic}[1]
+        %\setalglineno{3}
+        \scriptsize
+        \For{$\mathtt{r=1\ to\ n}$} \label{seq:send}
+        \State $\mathtt{Senders = pick(n-f, P)}$
+        \For{$\mathtt{s=1\ to\ n}$} 
+            \If{$\mathtt{p_s \in\ Senders}$}
+                \State $\mathtt{p_r}$ += $\mathtt{p_s.send[p_r]}$
+            \Else
+                \State $\mathtt{p_r}$ += $\mathtt{(*)p_s.send[p_r]}$
+            \EndIf
+        \EndFor
+        \EndFor
+        \end{algorithmic}
+        \caption{Deliver $n-f$}
+        \label{alg:seq-ben-or}
+    \end{subfigure}% need this comment symbol to avoid overfull hbox
+    %\hspace{0.01\textwidth}%
+    \begin{subfigure}{.45\textwidth}
+        \begin{algorithmic}[1]
+        %\setalglineno{3}
+        \scriptsize
+        \State $\mathtt{Kernel}$ = $\mathtt{pick(n-f, P)}$
+        \For{$\mathtt{p=1\ to\ n}$} \label{seq:send}
+            \For{$\mathtt{k=1\ to\ n}$} 
+                \If{$\mathtt{p_k \in\ Kernel}$}
+                    \State $\mathtt{p}$ += $\mathtt{p_k.send[p]}$
+                    \State $\mathtt{p_k}$ += $\mathtt{p.send[p_k]}$
+                \Else
+                    \State $\mathtt{p}$ += $\mathtt{(*)p_k.send[p]}$
+                \EndIf
+            \EndFor
+        \EndFor
+        \end{algorithmic}
+        \caption{Kernel}
+        \label{alg:seq-kernel}
+    \end{subfigure}
+    \caption{Sequentialization with network requirements}
+\end{figure}
+
+Ben-Or is not correct unless each process receives at least $n-f$ messages in each round, where $f$ is the number of tolerated faults.
+In this case the equivalent sequentialization, given in  Fig.~\ref{alg:seq-ben-or}, picks randomly which $n-f$ messages to deliver to each process. 
+When the network requires the existence of a kernel, a set of processes that everyone can communicate reliably with, e.g., UniformVoting, the equivalent sequentialization in Fig.~\ref{alg:seq-kernel} guesses the processes in the kernel in beginning of each round and always delivers messages between them. 
+
+\begin{proposition}
+Given a round-based protocol that assumes a \textit{Deliver n-f} or a \textit{Kernel} network, $\llbracket \Psync \rrbracket \approx \llbracket \Pseq \rrbracket$.
+\label{propo:sync:equiv:seq:network}
+\end{proposition}
